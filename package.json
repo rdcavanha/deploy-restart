@@ -1,0 +1,35 @@
+{
+  "name": "deploy-restart",
+  "version": "1.0.0",
+  "description": "Little JavaScript module to deploy files over SSH and restart Systemd Services",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rdcavanha/deploy-restart.git"
+  },
+  "keywords": [
+    "deploy",
+    "restart",
+    "ssh",
+    "systemd"
+  ],
+  "author": "Rodrigo Cavanha",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rdcavanha/deploy-restart/issues"
+  },
+  "homepage": "https://github.com/rdcavanha/deploy-restart#readme",
+  "types": "index.d.ts",
+  "devDependencies": {
+    "@types/node": "^12.7.4",
+    "typescript": "^3.6.2"
+  },
+  "dependencies": {
+    "scp2": "^0.5.0",
+    "ssh-exec": "^2.0.0"
+  }
+}
