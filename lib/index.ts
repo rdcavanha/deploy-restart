@@ -3,13 +3,13 @@ import * as fs from 'fs';
 import sshExec from 'ssh-exec';
 
 interface DeployRestartOptions {
-    username: string;
+    user: string;
     host: string;
+    localPath: string;
+    remoteDeployPath: string;
     privateKeyPath?: string
     password?: string
-    fromLocalPath: string;
-    toRemotePath: string;
-    restart: boolean;
+    restart?: boolean;
     serviceName?: string;
     serviceStartCommand?: string;
     serviceStopCommand?: string;
@@ -24,33 +24,29 @@ class DeployRestart {
         this.options = options;
 
         this.scpOptions = {
-            username: this.options.username,
+            username: this.options.user,
             host: this.options.host,
             privateKey: fs.readFileSync(this.options.privateKeyPath),
-            path: this.options.toRemotePath,
+            path: this.options.remoteDeployPath,
         };
 
         this.sshExecOptions = {
-            user: this.options.username,
+            user: this.options.user,
             host: this.options.host,
             key: this.options.privateKeyPath,
         }
     }
 
     deploy(): Promise<void> {
-        console.info('Starting Deployment to', this.options.toRemotePath);
-
         return new Promise((resolve, reject): void => {
             client.scp(
-                this.options.fromLocalPath,
+                this.options.localPath,
                 this.scpOptions,
                 err => {
-                    if (err) {
-                        console.error('Failed to deploy', err);
-                        reject();
-                    } else {
-                        console.info('Deployment succeeded');
+                    if (!err) {
                         resolve();
+                    } else {
+                        reject(err);
                     }
                 },
             );
@@ -59,14 +55,11 @@ class DeployRestart {
 
     startService(): Promise<void> {
         return new Promise((resolve, reject) => {
-            console.info('Starting service');
             sshExec(this.options.serviceStartCommand || `sudo systemctl start ${this.options.serviceName}`, this.sshExecOptions, err => {
                 if (!err) {
-                    console.info('Service started successfully');
                     resolve();
                 } else {
-                    console.error('Failed to start service', err);
-                    reject();
+                    reject(err);
                 }
             });
 
@@ -75,31 +68,36 @@ class DeployRestart {
 
     stopService(): Promise<void> {
         return new Promise((resolve, reject) => {
-            console.info('Stopping Service');
-
             sshExec(this.options.serviceStopCommand || `sudo systemctl stop ${this.options.serviceName}`, this.sshExecOptions, err => {
                 if (!err) {
-                    console.info('Service stopped successfully');
                     this.deploy()
                         .then(() => {
                             this.startService().then(resolve).catch(reject);
                         })
                         .catch(reject)
                 } else {
-                    console.error('Failed to stop service', err);
-                    reject();
+                    reject(err);
                 }
             });
-
         })
     };
 }
 
 
-const startDeployProcedure = (options: DeployRestartOptions): Promise<void> => {
-    const {restart} = options;
+const init = (options: DeployRestartOptions): Promise<void> => {
+    const {restart, serviceName, serviceStopCommand, serviceStartCommand} = options;
+
     const deployRestart = new DeployRestart(options);
-    return restart ? deployRestart.stopService() : deployRestart.deploy();
+
+    if (restart) {
+        if (!serviceStartCommand && !serviceStopCommand && !serviceName)
+            throw new Error('Define a serviceName, or serviceStopCommand and serviceStartCommand');
+        if ((serviceStartCommand && !serviceStopCommand) || (!serviceStartCommand && serviceStopCommand))
+            throw new Error('When serviceStartCommand is defined serviceStopCommand must be defined and vice versa');
+        return deployRestart.stopService()
+    }
+
+    return deployRestart.deploy();
 };
 
-export default startDeployProcedure;
+export default init;
