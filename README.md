@@ -1,4 +1,4 @@
-## deploy-restart?
+## deploy-restart
 Deploy an application to a remote Linux machine and restart a service using systemctl or other commands
 
 Install it through:
@@ -50,6 +50,7 @@ By calling the module's default export function as shown above, you'll get a ``P
 |restart|boolean|No
 
 If `restart` is true, then the following applies:
+
 |Name|Default|Type|Required|
 |--|--|--|--|
 |serviceName||string|Yes if `serviceStartCommand` and `serviceStopCommand` are not provided
