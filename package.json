@@ -1,7 +1,7 @@
 {
   "name": "deploy-restart",
   "version": "1.0.0",
-  "description": "Little JavaScript module to deploy files over SSH and restart Systemd Services",
+  "description": "Deploy an application to a remote Linux machine and restart a service using systemctl or other commands",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
@@ -15,7 +15,9 @@
     "deploy",
     "restart",
     "ssh",
-    "systemd"
+    "systemctl",
+    "service",
+    "linux"
   ],
   "author": "Rodrigo Cavanha",
   "license": "MIT",
