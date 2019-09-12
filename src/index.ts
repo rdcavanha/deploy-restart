@@ -82,9 +82,9 @@ export class DeployRestart {
             if ((serviceStartCommand && !serviceStopCommand) || (!serviceStartCommand && serviceStopCommand))
                 throw new Error('When serviceStartCommand is defined serviceStopCommand must be defined and vice versa');
 
-            await this.executeCommand(this.startServiceCommand);
-            await this.deploy();
             await this.executeCommand(this.stopServiceCommand);
+            await this.deploy();
+            await this.executeCommand(this.startServiceCommand);
         } else {
             await this.deploy();
         }

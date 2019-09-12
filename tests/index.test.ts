@@ -64,7 +64,7 @@ describe('when the restart flag is true', () => {
                 expect(e).toMatch('failed');
             }
 
-            expect(executeCommandSpy).toHaveBeenLastCalledWith(START_SERVICE_COMMAND);
+            expect(executeCommandSpy).not.toHaveBeenLastCalledWith(START_SERVICE_COMMAND);
 
             jest.clearAllMocks();
         });
