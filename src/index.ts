@@ -2,7 +2,7 @@ import client from 'scp2';
 import * as fs from 'fs';
 import sshExec from 'ssh-exec';
 
-interface DeployRestartOptions {
+export interface DeployRestartOptions {
     user: string;
     host: string;
     localPath: string;
@@ -15,7 +15,7 @@ interface DeployRestartOptions {
     serviceStopCommand?: string;
 }
 
-class DeployRestart {
+export class DeployRestart {
     private readonly options: DeployRestartOptions;
     private readonly scpOptions;
     private readonly sshExecOptions;
@@ -37,7 +37,7 @@ class DeployRestart {
         }
     }
 
-    deploy(): Promise<void> {
+    private deploy(): Promise<void> {
         return new Promise((resolve, reject): void => {
             client.scp(
                 this.options.localPath,
@@ -53,7 +53,7 @@ class DeployRestart {
         });
     };
 
-    startService(): Promise<void> {
+    private startService(): Promise<void> {
         return new Promise((resolve, reject) => {
             sshExec(this.options.serviceStartCommand || `sudo systemctl start ${this.options.serviceName}`, this.sshExecOptions, err => {
                 if (!err) {
@@ -66,7 +66,7 @@ class DeployRestart {
         })
     };
 
-    stopService(): Promise<void> {
+    private stopService(): Promise<void> {
         return new Promise((resolve, reject) => {
             sshExec(this.options.serviceStopCommand || `sudo systemctl stop ${this.options.serviceName}`, this.sshExecOptions, err => {
                 if (!err) {
@@ -81,23 +81,18 @@ class DeployRestart {
             });
         })
     };
-}
 
+    start(): Promise<void> {
+        const {restart, serviceName, serviceStopCommand, serviceStartCommand} = this.options;
 
-const init = (options: DeployRestartOptions): Promise<void> => {
-    const {restart, serviceName, serviceStopCommand, serviceStartCommand} = options;
+        if (restart) {
+            if (!serviceStartCommand && !serviceStopCommand && !serviceName)
+                throw new Error('Define a serviceName, or serviceStopCommand and serviceStartCommand');
+            if ((serviceStartCommand && !serviceStopCommand) || (!serviceStartCommand && serviceStopCommand))
+                throw new Error('When serviceStartCommand is defined serviceStopCommand must be defined and vice versa');
+            return this.stopService()
+        }
 
-    const deployRestart = new DeployRestart(options);
-
-    if (restart) {
-        if (!serviceStartCommand && !serviceStopCommand && !serviceName)
-            throw new Error('Define a serviceName, or serviceStopCommand and serviceStartCommand');
-        if ((serviceStartCommand && !serviceStopCommand) || (!serviceStartCommand && serviceStopCommand))
-            throw new Error('When serviceStartCommand is defined serviceStopCommand must be defined and vice versa');
-        return deployRestart.stopService()
+        return this.deploy();
     }
-
-    return deployRestart.deploy();
-};
-
-export default init;
+}

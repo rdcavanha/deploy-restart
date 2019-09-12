@@ -10,6 +10,6 @@
     "node_modules"
   ],
   "include": [
-    "lib/**/*.ts"
+    "src/**/*.ts"
   ]
 }

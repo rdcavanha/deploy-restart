@@ -1,9 +1,10 @@
 {
   "name": "deploy-restart",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Deploy an application to a remote Linux machine and restart a service using systemctl or other commands",
   "main": "dist/index.js",
   "scripts": {
+    "prepare": "tsc",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -25,7 +26,7 @@
     "url": "https://github.com/rdcavanha/deploy-restart/issues"
   },
   "homepage": "https://github.com/rdcavanha/deploy-restart#readme",
-  "types": "index.d.ts",
+  "types": "dist/index.d.ts",
   "devDependencies": {
     "@types/node": "^12.7.4",
     "typescript": "^3.6.2"

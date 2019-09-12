@@ -1,5 +1,3 @@
-Work in progres...
-
 ## deploy-restart
 Deploy an application to a remote Linux machine and restart a service using systemctl or other commands
 
@@ -64,7 +62,3 @@ In other words, you may either pass `serviceName` that will be executed with `su
 ## License
 MIT
 
-## Pull Requests
-Feel free do add additional features or improve the module
-
-		
