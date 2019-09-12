@@ -26,7 +26,7 @@ export class DeployRestart {
         this.scpOptions = {
             username: this.options.user,
             host: this.options.host,
-            privateKey: fs.readFileSync(this.options.privateKeyPath),
+            privateKey: this.options.privateKeyPath ? fs.readFileSync(this.options.privateKeyPath): undefined,
             path: this.options.remoteDeployPath,
         };
 
