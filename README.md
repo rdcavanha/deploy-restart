@@ -57,7 +57,7 @@ If `restart` is true, then the following applies:
 |serviceStartCommand|`sudo systemctl start serviceName`|string|Yes if `serviceName` is not provided or if `serviceStopCommand` is provided
 |serviceStopCommand|`sudo systemctl stop serviceName`|string|Yes if `serviceName` is not provided or if `serviceStartCommand` is provided
 
-In other words, you may either pass `serviceName` that will be executed with `sudo systemctl start serviceName` or pass both `serviceStartCommand` and `serviceStopCommand` to use your own commands
+In other words, you may either pass `serviceName` that will be executed as `sudo systemctl start serviceName` or pass both `serviceStartCommand` and `serviceStopCommand` to use your own commands.
 
 ## License
 MIT
