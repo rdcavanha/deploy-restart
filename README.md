@@ -16,21 +16,21 @@ This module executes three basic steps:
 
 ## Usage
 
-    import deploy from 'deploy-restart'
+    import { DeployRestart } from 'deploy-restart'
     
     ...
     
-    const options = {
+    const deployRestart = new DeployRestart({
 	    user: 'john',
 	    host: '192.168.1.1',
 	    localPath: '/home/john/app/dist',
-	    remoteDeployPath: '/home/john/services/app',
+	    remoteDeployPath: '/home/remote/services/app',
 	    restart: true,
 	    serviceName: 'app'
-    }
+    });
     
     try {
-		await deploy(options);
+		await deployRestart.start();
 	} catch (e) {
 		console.error(e);
 	}
