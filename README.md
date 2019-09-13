@@ -4,18 +4,20 @@ Deploy an application to a remote Linux machine and restart a service using syst
 Install it through:
 
     npm i -D deploy-restart
+<br />
+
+**This module executes three basic steps:**
+ 1. Stops a services
+ 2. Copies files over SCP
+ 3. Starts a service
+<br />
 
 Written in TypeScript. It uses two core module nodes:
  - ssh-exec: [https://github.com/mafintosh/ssh-exec](https://github.com/mafintosh/ssh-exec)
  - scp2: [https://github.com/spmjs/node-scp2](https://github.com/spmjs/node-scp2)
-
-This module executes three basic steps:
- 1. Stops a services
- 2. Copies files over SCP
- 3. Starts a service
+<br />
 
 ## Usage
-
 ```javascript
 import { DeployRestart } from 'deploy-restart'
 
@@ -38,6 +40,7 @@ try {
 ```
 
 By calling the module's default export function as shown above, you'll get a ``Promise<void>``.
+<br />
 
 ## Options
 |Name|Type|Required|
@@ -49,6 +52,7 @@ By calling the module's default export function as shown above, you'll get a ``P
 |privateKeyPath|string|No
 |password|string|No
 |restart|boolean|No
+<br />
 
 If `restart` is true, then the following applies:
 
@@ -59,6 +63,7 @@ If `restart` is true, then the following applies:
 |serviceStopCommand|`sudo systemctl stop serviceName`|string|Yes if `serviceName` is not provided or if `serviceStartCommand` is provided
 
 In other words, you may either pass `serviceName` that will be executed as `sudo systemctl start serviceName` or pass both `serviceStartCommand` and `serviceStopCommand` to use your own commands.
+<br />
 
 ## License
 MIT
