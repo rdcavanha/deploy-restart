@@ -22,18 +22,18 @@ import { DeployRestart } from 'deploy-restart'
 ...
 
 const deployRestart = new DeployRestart({
-	user: 'john',
-	host: '192.168.1.1',
-	localPath: '/home/john/app/dist',
-	remoteDeployPath: '/home/remote/services/app',
-	restart: true,
-	serviceName: 'app'
+    user: 'john',
+    host: '192.168.1.1',
+    localPath: '/home/john/app/dist',
+    remoteDeployPath: '/home/remote/services/app',
+    restart: true,
+    serviceName: 'app'
 });
 
 try {
-	await deployRestart.start();
+    await deployRestart.start();
 } catch (e) {
-	console.error(e);
+    console.error(e);
 }
 ```
 
