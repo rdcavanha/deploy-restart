@@ -16,25 +16,26 @@ This module executes three basic steps:
 
 ## Usage
 
-    import { DeployRestart } from 'deploy-restart'
-    
-    ...
-    
-    const deployRestart = new DeployRestart({
-	    user: 'john',
-	    host: '192.168.1.1',
-	    localPath: '/home/john/app/dist',
-	    remoteDeployPath: '/home/remote/services/app',
-	    restart: true,
-	    serviceName: 'app'
-    });
-    
-    try {
-		await deployRestart.start();
-	} catch (e) {
-		console.error(e);
-	}
+```javascript
+import { DeployRestart } from 'deploy-restart'
 
+...
+
+const deployRestart = new DeployRestart({
+	user: 'john',
+	host: '192.168.1.1',
+	localPath: '/home/john/app/dist',
+	remoteDeployPath: '/home/remote/services/app',
+	restart: true,
+	serviceName: 'app'
+});
+
+try {
+	await deployRestart.start();
+} catch (e) {
+	console.error(e);
+}
+```
 
 By calling the module's default export function as shown above, you'll get a ``Promise<void>``.
 
