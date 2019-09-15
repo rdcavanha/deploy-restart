@@ -50,10 +50,7 @@ If an error occurs, expect the following object:
     startServiceStatus: boolean;
     error: any; //Error thrown by that step that fails
 }
-
 ````
-
-<br />
 
 ## Options
 |Name|Type|Required|
