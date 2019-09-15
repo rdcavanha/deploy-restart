@@ -44,14 +44,14 @@ export class DeployRestart {
 
     }
 
-    private deploy(): Promise<void> {
+    private deploy(): Promise<boolean> {
         return new Promise((resolve, reject): void => {
             client.scp(
                 this.options.localPath,
                 this.scpOptions,
                 err => {
                     if (!err) {
-                        resolve();
+                        resolve(true);
                     } else {
                         reject(err);
                     }
@@ -60,11 +60,11 @@ export class DeployRestart {
         });
     };
 
-    private async executeCommand(command: string) {
+    private async executeCommand(command: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
             sshExec(command, this.sshExecOptions, err => {
                 if (!err) {
-                    resolve();
+                    resolve(true);
                 } else {
                     reject(err);
                 }
@@ -82,11 +82,23 @@ export class DeployRestart {
             if ((serviceStartCommand && !serviceStopCommand) || (!serviceStartCommand && serviceStopCommand))
                 throw new Error('When serviceStartCommand is defined serviceStopCommand must be defined and vice versa');
 
-            await this.executeCommand(this.stopServiceCommand);
-            await this.deploy();
-            await this.executeCommand(this.startServiceCommand);
-        } else {
-            await this.deploy();
         }
+
+        let stopServiceStatus = false;
+        let deployStatus = false;
+        let startServiceStatus = false;
+
+        try {
+            if (restart) {
+                stopServiceStatus = await this.executeCommand(this.stopServiceCommand);
+                deployStatus = await this.deploy();
+                startServiceStatus = await this.executeCommand(this.startServiceCommand);
+            } else {
+                deployStatus = await this.deploy();
+            }
+        } catch (e) {
+            throw {stopServiceStatus, deployStatus, startServiceStatus, error: e};
+        }
+
     }
 }

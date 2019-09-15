@@ -40,6 +40,19 @@ try {
 ```
 
 By calling the module's default export function as shown above, you'll get a ``Promise<void>``.
+
+If an error occurs, expect the following object:
+
+```javascript
+{
+    stopServiceStatus: boolean;
+    deployStatus: boolean;
+    startServiceStatus: boolean;
+    error: any; //Error thrown by that step that fails
+}
+
+````
+
 <br />
 
 ## Options

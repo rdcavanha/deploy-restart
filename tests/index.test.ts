@@ -1,4 +1,4 @@
-import {DeployRestart} from "../src/index";
+import {DeployRestart} from "../src";
 
 const DEPLOY_OPTIONS = {
     user: 'test',
@@ -20,7 +20,6 @@ const DEPLOY_OPTIONS_WITHOUT_RESTART = {
 };
 
 const START_SERVICE_COMMAND = 'sudo systemctl start test';
-const STOP_SERVICE_COMMAND = 'sudo systemctl stop test';
 
 
 let deployRestart: DeployRestart;
@@ -31,9 +30,13 @@ describe('when the restart flag is true', () => {
         deployRestart = new DeployRestart(DEPLOY_OPTIONS_WITH_RESTART);
     });
 
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
     describe('when the stop service step fails', () => {
 
-        it('rejects and does not execute the deploy step', async () => {
+        it('rejects with status and does not execute the deploy step', async () => {
             jest.spyOn<DeployRestart, any>(DeployRestart.prototype, 'executeCommand').mockRejectedValueOnce('failed');
 
             const deploySpy = jest.spyOn<DeployRestart, any>(DeployRestart.prototype, 'deploy');
@@ -41,51 +44,60 @@ describe('when the restart flag is true', () => {
             try {
                 await deployRestart.start();
             } catch (e) {
-                expect(e).toMatch('failed');
+                expect(e).toEqual({
+                    stopServiceStatus: false,
+                    deployStatus: false,
+                    startServiceStatus: false,
+                    error: 'failed'
+                });
             }
 
             expect(deploySpy).not.toHaveBeenCalled();
-
-            jest.clearAllMocks();
         });
 
     });
 
     describe('when the deploy step fails', () => {
 
-        it('rejects and does not execute the start service step', async () => {
+        it('rejects with status and does not execute the start service step', async () => {
             jest.spyOn<DeployRestart, any>(DeployRestart.prototype, 'deploy').mockRejectedValueOnce('failed');
 
-            const executeCommandSpy = jest.spyOn<DeployRestart, any>(DeployRestart.prototype, 'executeCommand').mockResolvedValueOnce('');
+            const executeCommandSpy = jest.spyOn<DeployRestart, any>(DeployRestart.prototype, 'executeCommand').mockResolvedValueOnce(true);
 
             try {
                 await deployRestart.start();
             } catch (e) {
-                expect(e).toMatch('failed');
+                expect(e).toEqual({
+                    stopServiceStatus: true,
+                    deployStatus: false,
+                    startServiceStatus: false,
+                    error: 'failed'
+                });
             }
 
             expect(executeCommandSpy).not.toHaveBeenLastCalledWith(START_SERVICE_COMMAND);
-
-            jest.clearAllMocks();
         });
 
     });
 
-    describe('when the stop service step fails', () => {
+    describe('when the start service step fails', () => {
 
-        it('rejects', async () => {
+        it('rejects with status', async () => {
             jest.spyOn<DeployRestart, any>(DeployRestart.prototype, 'executeCommand').mockImplementation((command) =>
-                command === STOP_SERVICE_COMMAND ? Promise.reject('failed') : Promise.resolve());
+                command === START_SERVICE_COMMAND ? Promise.reject('failed') : Promise.resolve(true));
 
-            jest.spyOn<DeployRestart, any>(DeployRestart.prototype, 'deploy').mockResolvedValueOnce('');
+            jest.spyOn<DeployRestart, any>(DeployRestart.prototype, 'deploy').mockResolvedValueOnce(true);
 
             try {
                 await deployRestart.start();
             } catch (e) {
-                expect(e).toMatch('failed');
+                expect(e).toEqual({
+                    stopServiceStatus: true,
+                    deployStatus: true,
+                    startServiceStatus: false,
+                    error: 'failed'
+                });
             }
-
-            jest.clearAllMocks();
         });
 
     });
@@ -97,9 +109,9 @@ describe('when the restart flag is falsy', () => {
         deployRestart = new DeployRestart(DEPLOY_OPTIONS_WITHOUT_RESTART);
     });
 
-    it('deploys only', async() => {
-        const deploySpy = jest.spyOn<DeployRestart, any>(DeployRestart.prototype, 'deploy').mockResolvedValueOnce('');
-        const executeCommandSpy = jest.spyOn<DeployRestart, any>(DeployRestart.prototype, 'executeCommand').mockResolvedValueOnce('');
+    it('deploys only', async () => {
+        const deploySpy = jest.spyOn<DeployRestart, any>(DeployRestart.prototype, 'deploy').mockResolvedValueOnce(true);
+        const executeCommandSpy = jest.spyOn<DeployRestart, any>(DeployRestart.prototype, 'executeCommand').mockResolvedValueOnce(true);
 
         await deployRestart.start();
 
