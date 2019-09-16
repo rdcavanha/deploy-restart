@@ -7,7 +7,7 @@ Install it through:
 <br />
 
 **This module executes three basic steps:**
- 1. Stops a services
+ 1. Stops a service
  2. Copies files over SCP
  3. Starts a service
 <br />
