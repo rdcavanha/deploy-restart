@@ -7,12 +7,12 @@ Install it through:
 <br />
 
 **This module executes three basic steps:**
- 1. Stops a services
+ 1. Stops a service
  2. Copies files over SCP
  3. Starts a service
 <br />
 
-Written in TypeScript. It uses two core module nodes:
+Written in TypeScript. It uses two core node modules:
  - ssh-exec: [https://github.com/mafintosh/ssh-exec](https://github.com/mafintosh/ssh-exec)
  - scp2: [https://github.com/spmjs/node-scp2](https://github.com/spmjs/node-scp2)
 <br />
@@ -39,16 +39,14 @@ try {
 }
 ```
 
-By calling the module's default export function as shown above, you'll get a ``Promise<void>``.
-
-If an error occurs, expect the following object:
+The start method resolves with ``void`` and rejects with the following object: 
 
 ```javascript
 {
     stopServiceStatus: boolean;
     deployStatus: boolean;
     startServiceStatus: boolean;
-    error: any; //Error thrown by that step that fails
+    error: any; //Error thrown by the step that fails
 }
 ````
 
