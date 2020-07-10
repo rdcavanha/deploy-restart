@@ -1,28 +1,22 @@
-/* eslint-disable import/first,no-new */
-let aPassword = 'aPassword';
-const passwordPromptMock = jest.fn(() => aPassword);
-jest.mock('password-prompt', () => passwordPromptMock);
-
-import passwordPrompt from 'password-prompt';
+/* eslint-disable prefer-promise-reject-errors */
 import { DeployRestart } from '../src';
 
-const DEPLOY_OPTIONS_WITHOUT_CREDENTIALS = {
+const DEPLOY_OPTIONS = {
   user: 'test',
+  password: 'test',
   host: 'test',
   localPath: 'test',
   remoteDeployPath: 'test',
   serviceName: 'test',
 };
 
-const DEPLOY_OPTIONS_WITH_RESTART_AND_CREDENTIALS = {
-  ...DEPLOY_OPTIONS_WITHOUT_CREDENTIALS,
-  password: aPassword,
+const DEPLOY_OPTIONS_WITH_RESTART = {
+  ...DEPLOY_OPTIONS,
   restart: true,
 };
 
-const DEPLOY_OPTIONS_WITH_CREDENTIALS_AND_WITHOUT_RESTART = {
-  ...DEPLOY_OPTIONS_WITHOUT_CREDENTIALS,
-  password: aPassword,
+const DEPLOY_OPTIONS_WITHOUT_RESTART = {
+  ...DEPLOY_OPTIONS,
   restart: false,
 };
 
@@ -32,31 +26,11 @@ let deployRestart: DeployRestart;
 
 describe('when the restart flag is true', () => {
   beforeEach(() => {
-    aPassword = 'aPassword';
-    deployRestart = new DeployRestart(DEPLOY_OPTIONS_WITH_RESTART_AND_CREDENTIALS);
+    deployRestart = new DeployRestart(DEPLOY_OPTIONS_WITH_RESTART);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
-  });
-
-  describe('when no password nor key is provider', () => {
-    it('asks for password', () => {
-      new DeployRestart(DEPLOY_OPTIONS_WITHOUT_CREDENTIALS);
-
-      expect(passwordPrompt).toHaveBeenCalled();
-    });
-
-    it('throws error if no password is provided', () => {
-      aPassword = '';
-
-      try {
-        new DeployRestart(DEPLOY_OPTIONS_WITHOUT_CREDENTIALS);
-        expect(true).toBe(false);
-      } catch (e) {
-        expect(true).toBe(true);
-      }
-    });
   });
 
   describe('when the stop service step fails', () => {
@@ -108,7 +82,7 @@ describe('when the restart flag is true', () => {
       jest
         .spyOn<DeployRestart, any>(DeployRestart.prototype, 'executeCommand')
         .mockImplementation((command) =>
-          command === START_SERVICE_COMMAND ? Promise.reject(new Error('failed')) : Promise.resolve(true),
+          command === START_SERVICE_COMMAND ? Promise.reject('failed') : Promise.resolve(true),
         );
 
       jest.spyOn<DeployRestart, any>(DeployRestart.prototype, 'deploy').mockResolvedValueOnce(true);
@@ -120,7 +94,7 @@ describe('when the restart flag is true', () => {
           stopServiceStatus: true,
           deployStatus: true,
           startServiceStatus: false,
-          error: new Error('failed'),
+          error: 'failed',
         });
       }
     });
@@ -129,7 +103,7 @@ describe('when the restart flag is true', () => {
 
 describe('when the restart flag is falsy', () => {
   beforeEach(() => {
-    deployRestart = new DeployRestart(DEPLOY_OPTIONS_WITH_CREDENTIALS_AND_WITHOUT_RESTART);
+    deployRestart = new DeployRestart(DEPLOY_OPTIONS_WITHOUT_RESTART);
   });
 
   it('deploys only', async () => {

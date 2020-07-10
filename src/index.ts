@@ -1,7 +1,6 @@
 import client from 'scp2';
 import * as fs from 'fs';
 import sshExec from 'ssh-exec';
-import passwordPrompt from 'password-prompt';
 
 export interface DeployRestartOptions {
   user: string;
@@ -31,30 +30,19 @@ export class DeployRestart {
     this.options = options;
 
     const privateKey = this.options.privateKeyPath ? fs.readFileSync(this.options.privateKeyPath) : undefined;
-    const { password } = this.options;
-
-    let enteredPassword: string;
-    if (!privateKey && !password) {
-      enteredPassword = passwordPrompt(`deploy-restart: Enter password for user ${this.options.user}:`);
-      if (!enteredPassword) {
-        throw new Error(
-          'Cannot proceed without credentials. Please configure a password/key or enter a non empty password',
-        );
-      }
-    }
 
     this.scpOptions = {
       username: this.options.user,
       host: this.options.host,
       privateKey,
-      password: enteredPassword,
+      password: this.options.password,
       path: this.options.remoteDeployPath,
     };
 
     this.sshExecOptions = {
       user: this.options.user,
       host: this.options.host,
-      password: enteredPassword,
+      password: this.options.password,
       key: privateKey,
     };
 
