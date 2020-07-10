@@ -19,7 +19,7 @@ Written in TypeScript. It uses two core node modules:
 
 ## Usage
 ```javascript
-import { DeployRestart } from 'deploy-restart'
+import { DeployRestart } from 'deploy-restart';
 
 ...
 
