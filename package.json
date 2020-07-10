@@ -1,6 +1,6 @@
 {
   "name": "deploy-restart",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Deploy an application to a remote Linux machine and restart a service using systemctl or other commands",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
