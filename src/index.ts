@@ -3,102 +3,97 @@ import * as fs from 'fs';
 import sshExec from 'ssh-exec';
 
 export interface DeployRestartOptions {
-    user: string;
-    host: string;
-    localPath: string;
-    remoteDeployPath: string;
-    privateKeyPath?: string
-    password?: string
-    restart?: boolean;
-    serviceName?: string;
-    serviceStartCommand?: string;
-    serviceStopCommand?: string;
+  user: string;
+  host: string;
+  localPath: string;
+  remoteDeployPath: string;
+  privateKeyPath?: string;
+  password?: string;
+  restart?: boolean;
+  serviceName?: string;
+  serviceStartCommand?: string;
+  serviceStopCommand?: string;
 }
 
 export class DeployRestart {
-    private readonly options: DeployRestartOptions;
-    private readonly scpOptions;
-    private readonly sshExecOptions;
+  private readonly options: DeployRestartOptions;
 
-    private readonly startServiceCommand;
-    private readonly stopServiceCommand;
+  private readonly scpOptions;
 
-    constructor(options: DeployRestartOptions) {
-        this.options = options;
+  private readonly sshExecOptions;
 
-        this.scpOptions = {
-            username: this.options.user,
-            host: this.options.host,
-            privateKey: this.options.privateKeyPath ? fs.readFileSync(this.options.privateKeyPath) : undefined,
-            path: this.options.remoteDeployPath,
-        };
+  private readonly startServiceCommand;
 
-        this.sshExecOptions = {
-            user: this.options.user,
-            host: this.options.host,
-            key: this.options.privateKeyPath,
-        };
+  private readonly stopServiceCommand;
 
-        this.stopServiceCommand = this.options.serviceStartCommand || `sudo systemctl stop ${this.options.serviceName}`;
-        this.startServiceCommand = this.options.serviceStartCommand || `sudo systemctl start ${this.options.serviceName}`;
+  constructor(options: DeployRestartOptions) {
+    this.options = options;
 
-    }
-
-    private deploy(): Promise<boolean> {
-        return new Promise((resolve, reject): void => {
-            client.scp(
-                this.options.localPath,
-                this.scpOptions,
-                err => {
-                    if (!err) {
-                        resolve(true);
-                    } else {
-                        reject(err);
-                    }
-                },
-            );
-        });
+    this.scpOptions = {
+      username: this.options.user,
+      host: this.options.host,
+      privateKey: this.options.privateKeyPath ? fs.readFileSync(this.options.privateKeyPath) : undefined,
+      path: this.options.remoteDeployPath,
     };
 
-    private async executeCommand(command: string): Promise<boolean> {
-        return new Promise((resolve, reject) => {
-            sshExec(command, this.sshExecOptions, err => {
-                if (!err) {
-                    resolve(true);
-                } else {
-                    reject(err);
-                }
-            });
+    this.sshExecOptions = {
+      user: this.options.user,
+      host: this.options.host,
+      key: this.options.privateKeyPath,
+    };
 
-        })
+    this.stopServiceCommand = this.options.serviceStartCommand || `sudo systemctl stop ${this.options.serviceName}`;
+    this.startServiceCommand = this.options.serviceStartCommand || `sudo systemctl start ${this.options.serviceName}`;
+  }
+
+  private deploy(): Promise<boolean> {
+    return new Promise((resolve, reject): void => {
+      client.scp(this.options.localPath, this.scpOptions, (err) => {
+        if (!err) {
+          resolve(true);
+        } else {
+          reject(err);
+        }
+      });
+    });
+  }
+
+  private async executeCommand(command: string): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      sshExec(command, this.sshExecOptions, (err) => {
+        if (!err) {
+          resolve(true);
+        } else {
+          reject(err);
+        }
+      });
+    });
+  }
+
+  async start(): Promise<void> {
+    const { restart, serviceName, serviceStopCommand, serviceStartCommand } = this.options;
+
+    if (restart) {
+      if (!serviceStartCommand && !serviceStopCommand && !serviceName)
+        throw new Error('Define a serviceName, or serviceStopCommand and serviceStartCommand');
+      if ((serviceStartCommand && !serviceStopCommand) || (!serviceStartCommand && serviceStopCommand))
+        throw new Error('When serviceStartCommand is defined serviceStopCommand must be defined and vice versa');
     }
 
-    async start(): Promise<void> {
-        const {restart, serviceName, serviceStopCommand, serviceStartCommand} = this.options;
+    let stopServiceStatus = false;
+    let deployStatus = false;
+    let startServiceStatus = false;
 
-        if (restart) {
-            if (!serviceStartCommand && !serviceStopCommand && !serviceName)
-                throw new Error('Define a serviceName, or serviceStopCommand and serviceStartCommand');
-            if ((serviceStartCommand && !serviceStopCommand) || (!serviceStartCommand && serviceStopCommand))
-                throw new Error('When serviceStartCommand is defined serviceStopCommand must be defined and vice versa');
-
-        }
-
-        let stopServiceStatus = false;
-        let deployStatus = false;
-        let startServiceStatus = false;
-
-        try {
-            if (restart) {
-                stopServiceStatus = await this.executeCommand(this.stopServiceCommand);
-                deployStatus = await this.deploy();
-                startServiceStatus = await this.executeCommand(this.startServiceCommand);
-            } else {
-                deployStatus = await this.deploy();
-            }
-        } catch (e) {
-            throw {stopServiceStatus, deployStatus, startServiceStatus, error: e};
-        }
-
+    try {
+      if (restart) {
+        stopServiceStatus = await this.executeCommand(this.stopServiceCommand);
+        deployStatus = await this.deploy();
+        startServiceStatus = await this.executeCommand(this.startServiceCommand);
+      } else {
+        deployStatus = await this.deploy();
+      }
+    } catch (e) {
+      throw { stopServiceStatus, deployStatus, startServiceStatus, error: e };
     }
+  }
 }
